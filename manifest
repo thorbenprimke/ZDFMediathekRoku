@@ -1,0 +1,13 @@
+title=ZDF Mediathek
+subtitle=Alle Aktuellen Sendungen des ZDF
+major_version=1
+minor_version=0
+build_version=00001
+mm_icon_focus_hd=pkg:/images/MainMenu_Icon_CenterFocus_HD.png
+mm_icon_side_hd=pkg:/images/MainMenu_Icon_Side_HD.png
+mm_icon_focus_sd=pkg:/images/MainMenu_Icon_CenterFocus_SD.png
+mm_icon_side_sd=pkg:/images/MainMenu_Icon_Side_SD.png
+splash_screen_sd=pkg:/images/Splash_SD.png
+splash_screen_hd=pkg:/images/Splash_HD.png
+splash_color=#ffffff
+splash_min_time=3
