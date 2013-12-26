@@ -192,7 +192,10 @@ Function GetZDFShowData(show As Object) As Dynamic
                     o.AssetId = item.getBody()
                     print item.getBody()
                 endif
-                
+                if item.getName() = "airtime"
+                    o.Description = item.getBody()
+                    o.ShortDescriptionLine2 = item.getBody()
+                endif
             next
         endif
         if video.getName() = "formitaeten"
@@ -222,7 +225,7 @@ Function GetZDFShowData(show As Object) As Dynamic
                         next
                         
                         print videoUrl
-                        if quality = "high" and ratio = "16:9" and facet = "progressive"
+                        if quality = "veryhigh" and ratio = "16:9" and facet = "progressive"
                             o.StreamUrls = [videoUrl]
                         endif
                         print o.StreamUrls
@@ -265,9 +268,12 @@ Function ParseZDFDay(conn As Object) As Dynamic
     'topNode = MakeEmptyCatNode()
     'topNode.Title = "root"
     'topNode.isapphome = true
-    topNode = CreateObject("roArray", 10, true)
+    topNode = CreateObject("roAssociativeArray")
+    topNode["morgens"] = CreateObject("roArray", 10, true)
+    topNode["mittags"] = CreateObject("roArray", 10, true)
+    topNode["abends"] = CreateObject("roArray", 10, true)
+    topNode["nachts"] = CreateObject("roArray", 10, true)
     
-
     print xml.GetName()
     level1 = xml.GetChildElements()
     
@@ -290,8 +296,8 @@ Function ParseZDFDay(conn As Object) As Dynamic
                         print item.getBody()
                     endif
                     if item.getName() = "detail"
-                        o.Description = item.getBody()
-                        o.ShortDescriptionLine2 = item.getBody()
+                      '  o.Description = item.getBody()
+                       ' o.ShortDescriptionLine2 = item.getBody()
                     endif                    
                 next
             endif
@@ -300,10 +306,10 @@ Function ParseZDFDay(conn As Object) As Dynamic
                 for each item in items
                     attrs = item.GetAttributes()
                     for each attr in attrs
-                        if attr = "key" and item.GetAttributes()[attr] = "72x54"
+                        if attr = "key" and item.GetAttributes()[attr] = "144x81"
                             o.SDPosterURL = item.getBody()
                         endif
-                        if attr = "key" and item.GetAttributes()[attr] = "485x273"
+                        if attr = "key" and item.GetAttributes()[attr] = "236x133"
                             o.HDPosterURL = item.getBody()
                         endif
                     next
@@ -316,12 +322,18 @@ Function ParseZDFDay(conn As Object) As Dynamic
                         o.AssetId = item.getBody()
                         print item.getBody()
                     endif
+                if item.getName() = "airtime"
+                    o.Description = item.getBody()
+                    o.ShortDescriptionLine2 = item.getBody()
+                endif
                 next
             endif
             
         next
-    print "adding item"
-    topNode.Push(o)
+        print "adding item"
+'        teaser.getAttributes()["member"]
+        topNode[teaser.getAttributes()["member"]].Push(o)  
+ '       topNode.Push(o)
     next
     
     print "ZDF parsing done"

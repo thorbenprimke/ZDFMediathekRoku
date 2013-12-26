@@ -2,43 +2,31 @@ Function preShowSendungVerpasstScreen() As Object
     port=CreateObject("roMessagePort")
     screen = CreateObject("roGridScreen")
     screen.SetMessagePort(port)
+    screen.setGridStyle("flat-16x9")
     return screen
 End Function
 
 Function showSendungVerpasstScreen(screen) As Integer
-    rowTitles = CreateObject("roArray", 10, true)
-    for j = 0 to 10
-        rowTitles.Push("[Row Title " + j.toStr() + " ] ")
-    end for
-    screen.SetupLists(rowTitles.Count())
-    screen.SetListNames(rowTitles)
-    for j = 0 to 10
-        list = CreateObject("roArray", 10, true)
-        for i = 0 to 10
-             o = CreateObject("roAssociativeArray")
-             o.ContentType = "episode"
-             o.Title = "[Title" + i.toStr() + "]"
-             o.ShortDescriptionLine1 = "[ShortDescriptionLine1]"
-             o.ShortDescriptionLine2 = "[ShortDescriptionLine2]"
-             o.Description = ""
-             o.Description = "[Description] "
-             o.Rating = "NR"
-             o.StarRating = "75"
-             o.ReleaseDate = "[<mm/dd/yyyy]"
-             o.Length = 5400
-             o.Actors = []
-             o.Actors.Push("[Actor1]")
-             o.Actors.Push("[Actor2]")
-             o.Actors.Push("[Actor3]")
-             o.Director = "[Director]"
-             list.Push(o)
-         end for
-         screen.SetContentList(j, list)
-     end for
+     rowDesc = [ "Morgens (5:30 - 12:00)", "Mittags (12:00 - 19:00)", "Abends (19:00 - 00:00)", "Nachts (00:00 - 05:30)"]
+     rowTitles = [ "morgens", "mittags", "abends", "nachts"]
+     screen.SetupLists(rowDesc.Count())
+     screen.SetListNames(rowDesc)
      conn = InitCategoryFeedConnection()
      data = conn.LoadCategoryFeed(conn)
-     screen.SetContentList(0, data)
 
+     index = 0
+     for each item in data
+         For i=0 To rowTitles.Count() Step 1
+            if rowTitles[i] = item
+                screen.SetContentList(i, data[item])
+            endif
+            print i
+        End For
+     end for
+     screen.SetFocusedListItem(3, 0)
+     screen.SetFocusedListItem(2, 0)
+     screen.SetFocusedListItem(1, 0)
+     screen.SetFocusedListItem(0, 0)
      screen.Show()
      while true
          msg = wait(0, screen.GetMessagePort())
