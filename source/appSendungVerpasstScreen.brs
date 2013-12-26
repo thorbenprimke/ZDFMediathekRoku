@@ -6,26 +6,20 @@ Function preShowSendungVerpasstScreen() As Object
     return screen
 End Function
 
-Function showSendungVerpasstScreen(screen) As Integer
+Function showSendungVerpasstScreen(screen As Object, day As Object) As Integer
      rowDesc = [ "Morgens (5:30 - 12:00)", "Mittags (12:00 - 19:00)", "Abends (19:00 - 00:00)", "Nachts (00:00 - 05:30)"]
      rowTitles = [ "morgens", "mittags", "abends", "nachts"]
      screen.SetupLists(rowDesc.Count())
      screen.SetListNames(rowDesc)
-     conn = InitCategoryFeedConnection()
-     data = conn.LoadCategoryFeed(conn)
+     data = ParseZDFDay(day)
+
 
      index = 0
      for each item in data
-         For i=0 To rowTitles.Count() Step 1
-            if rowTitles[i] = item
-                screen.SetContentList(i, data[item])
-            endif
-            print i
-        End For
+        screen.SetContentList(index, data[index])
+        screen.SetFocusedListItem(index, 0)
+        index = index + 1
      end for
-     screen.SetFocusedListItem(3, 0)
-     screen.SetFocusedListItem(2, 0)
-     screen.SetFocusedListItem(1, 0)
      screen.SetFocusedListItem(0, 0)
      screen.Show()
      while true
@@ -39,8 +33,7 @@ Function showSendungVerpasstScreen(screen) As Integer
              elseif msg.isListItemSelected()
                  print "Selected msg: ";msg.GetMessage();"row: ";msg.GetIndex();
                  print " col: ";msg.GetData()
-                 displayShowDetailScreenShow(data[msg.getData()])
-                 
+                 displayShowDetailScreenShow(data[msg.getIndex()][msg.getData()])
              endif
          endif
      end while

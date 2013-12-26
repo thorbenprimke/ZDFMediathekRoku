@@ -10,7 +10,7 @@ Function preShowCategoryScreen() As Object
 
 End Function
 
-Function showCategoryScreen(screen) As Integer
+Function showCategoryScreen(screen As Object) As Integer
 
     if validateParam(screen, "roPosterScreen", "showCategoryScreen") = false return -1
 
@@ -27,7 +27,7 @@ Function showCategoryScreen(screen) As Integer
          o.ContentType = "episode"
          o.Title = "[Title]"
          o.ShortDescriptionLine1 = date.asDateString("long-date")
-         o.ShortDescriptionLine2 = date.getDayOfMonth().tostr() + "/" + date.getMonth().tostr() + "/" + date.getYear().tostr() 
+         o.ShortDescriptionLine2 = formatDateForXMLRequest(date)
          o.Description = ""
          o.Description = "[Description] "
          o.Rating = "NR"
@@ -43,6 +43,7 @@ Function showCategoryScreen(screen) As Integer
          o.Actors.Push("[Actor2]")
          o.Actors.Push("[Actor3]")
          o.Director = "[Director]"
+         o.RequestDate = formatDateForXMLRequest(date)
          list.Push(o)
          date.FromSeconds(date.AsSeconds() - 86400)
      End For
@@ -64,7 +65,7 @@ Function showCategoryScreen(screen) As Integer
                 print "list focused | index = "; msg.GetIndex(); " | category = "; m.curCategory
             else if msg.isListItemSelected() then
                 print "list item selected | index = "; msg.GetIndex()
-                showSendungVerpasst()
+                showSendungVerpasst(list[msg.GetIndex()])
 '                kid = m.Categories.Kids[msg.GetIndex()]
  '               if kid.type = "special_category" then
                     'displaySpecialCategoryScreen()
@@ -82,7 +83,28 @@ Function showCategoryScreen(screen) As Integer
     return 0
 End Function
 
-Function showSendungVerpasst() As Dynamic
+Function showSendungVerpasst(day As Object) As Dynamic
     screen = preShowSendungVerpasstScreen()
-    showSendungVerpasstScreen(screen)
+    showSendungVerpasstScreen(screen, day)
 End Function
+
+
+Function formatDateForXMLRequest(date As Object) As Dynamic
+    day = date.getDayOfMonth()
+    month = date.getMonth()
+    year = date.getYear()
+    dateString = ""
+    if day < 10
+        dateString = dateString + "0" + day.toStr()
+    else
+        dateString = dateString + day.tostr()
+    endif
+    if month < 10
+        dateString = dateString + "0" + month.toStr()
+    else
+        dateString = dateString + month.tostr()
+    endif
+    dateString = dateString + (year - 2000).toStr()
+    return dateString
+End Function
+

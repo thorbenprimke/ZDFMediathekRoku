@@ -245,34 +245,38 @@ Function GetZDFShowData(show As Object) As Dynamic
 
 End Function
 
-Function ParseZDFDay(conn As Object) As Dynamic
+Function ParseZDFDay(day As Object) As Dynamic
     print "ZDF parsing"
     
-    http = NewHttp(conn.UrlZDF)
+
+    date = day.RequestDate
+    print "Request for day: " + date
+    dayUrl = "http://www.zdf.de/ZDFmediathek/xmlservice/web/sendungVerpasst?startdate=" + date + "&maxLength=50&enddate=" + date
+    http = NewHttp(dayUrl)
 
     Dbg("url: ", http.Http.GetUrl())
 
-    conn.Timer.Mark()
+'    conn.Timer.Mark()
     rsp = http.GetToStringWithRetry()
-    Dbg("Took: ", conn.Timer)
+ '   Dbg("Took: ", conn.Timer)
 
-    conn.Timer.Mark()
+  '  conn.Timer.Mark()
     xml=CreateObject("roXMLElement")
     if not xml.Parse(rsp) then
          print "Can't parse feed"
         return invalid
     endif
-    Dbg("Parse Took: ", conn.Timer)
+   ' Dbg("Parse Took: ", conn.Timer)
     
 
     'topNode = MakeEmptyCatNode()
     'topNode.Title = "root"
     'topNode.isapphome = true
-    topNode = CreateObject("roAssociativeArray")
-    topNode["morgens"] = CreateObject("roArray", 10, true)
-    topNode["mittags"] = CreateObject("roArray", 10, true)
-    topNode["abends"] = CreateObject("roArray", 10, true)
-    topNode["nachts"] = CreateObject("roArray", 10, true)
+    topNode = CreateObject("roArray", 4, true)
+    topNode[0] = CreateObject("roArray", 10, true)
+    topNode[1] = CreateObject("roArray", 10, true)
+    topNode[2] = CreateObject("roArray", 10, true)
+    topNode[3] = CreateObject("roArray", 10, true)
     
     print xml.GetName()
     level1 = xml.GetChildElements()
@@ -332,7 +336,7 @@ Function ParseZDFDay(conn As Object) As Dynamic
         next
         print "adding item"
 '        teaser.getAttributes()["member"]
-        topNode[teaser.getAttributes()["member"]].Push(o)  
+        topNode[timeOfDayToIndex(teaser.getAttributes()["member"])].Push(o)  
  '       topNode.Push(o)
     next
     
@@ -340,7 +344,17 @@ Function ParseZDFDay(conn As Object) As Dynamic
     return topNode
 End Function
     
-    
+Function timeOfDayToIndex(time As String) As Integer
+    if time = "morgens" then
+        return 0
+    elseif time = "mittags" then
+        return 1
+    elseif time = "abends" then
+        return 2
+    else
+        return 3
+    end if
+End Function    
 
 
 '***********************************************************
