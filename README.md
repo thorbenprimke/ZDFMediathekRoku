@@ -18,3 +18,9 @@ Status:
 It's still a work in progress but it dynamically loads the content of the past seven days and
 serves up the clips. It doesn't have a pretty detail screen yet and doesn't give any hint if a
 clip isn't available (urls missing from xml response). 
+
+
+### Notes: ###
+- The code is heavily based on Roku's Videoplayer sample which is published under
+http://creativecommons.org/licenses/by-nc-nd/3.0/
+- ...
