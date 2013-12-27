@@ -1,80 +1,45 @@
-Function preShowCategoryScreen() As Object
+'**********************************************************
+'**  ZDF Mediathek - Category screen with sections such as
+'**  Sendung Verpasst, Live Sendungen, Impressum, ...
+'**********************************************************
 
-    port=CreateObject("roMessagePort")
+'**********************************************************
+' Sets up the screen, port and executes the init functions
+' to set up the filters (headers) and list content.
+'**********************************************************
+Function preShowCategoryScreen() As Object
+    port = CreateObject("roMessagePort")
     screen = CreateObject("roPosterScreen")
     screen.SetMessagePort(port)
-
-    screen.SetListStyle("flat-category")
-    screen.setAdDisplayMode("scale-to-fit")
+    screen.SetListStyle("arced-square")
+    initFilters(screen)
+    initSenungVerpasstSection(screen)
     return screen
-
 End Function
 
+'**********************************************************
+' Sets up the screen, port and executes the init functions
+' to set up the filters (headers) and list content.
+'**********************************************************
 Function showCategoryScreen(screen As Object) As Integer
-
     if validateParam(screen, "roPosterScreen", "showCategoryScreen") = false return -1
 
-     filters = CreateObject("roArray", 3, true)
-     filters.push("Verpasste Sendungen")
-     filters.push("Sendungen A-Z")
-     filters.push("Impressum")
-     screen.SetListNames(filters)
-
-     list = CreateObject("roArray", 10, true)
-     date = CreateObject("roDateTime")
-     For i = 0 To 7
-         o = CreateObject("roAssociativeArray")
-         o.ContentType = "episode"
-         o.Title = "[Title]"
-         o.ShortDescriptionLine1 = date.asDateString("long-date")
-         o.ShortDescriptionLine2 = formatDateForXMLRequest(date)
-         o.Description = ""
-         o.Description = "[Description] "
-         o.Rating = "NR"
-         o.StarRating = "75"
-         o.ReleaseDate = "[<mm/dd/yyyy]"
-         o.Length = 5400
-         o.Categories = []
-         o.Categories.Push("[Category1]")
-         o.Categories.Push("[Category2]")
-         o.Categories.Push("[Category3]")
-         o.Actors = []
-         o.Actors.Push("[Actor1]")
-         o.Actors.Push("[Actor2]")
-         o.Actors.Push("[Actor3]")
-         o.Director = "[Director]"
-         o.RequestDate = formatDateForXMLRequest(date)
-         list.Push(o)
-         date.FromSeconds(date.AsSeconds() - 86400)
-     End For
-     screen.SetContentList(list)
-
-
-'    initCategoryList()
-'    screen.SetContentList(m.Categories.Kids)
-    screen.SetFocusedList(0)
-    screen.SetFocusedListItem(0)
-    screen.SetFocusToFilterBanner(false)
+    resetSelection(screen)
     screen.Show()
 
     while true
         msg = wait(0, screen.GetMessagePort())
         if type(msg) = "roPosterScreenEvent" then
-            print "showHomeScreen | msg = "; msg.GetMessage() " | index = "; msg.GetIndex()
+            print "showCategoryScreen | msg = "; msg.GetMessage() " | index = "; msg.GetIndex()
             if msg.isListFocused() then
                 print "list focused | index = "; msg.GetIndex(); " | category = "; m.curCategory
+                if msg.GetIndex() = 1 then
+                    ShowDialog1Button("Impressum", "Hacked up by Thorben with no endorsement, support or approval by the ZDF.", "Got it!")
+                    resetSelection(screen)
+                end if
             else if msg.isListItemSelected() then
                 print "list item selected | index = "; msg.GetIndex()
-                showSendungVerpasst(list[msg.GetIndex()])
-'                kid = m.Categories.Kids[msg.GetIndex()]
- '               if kid.type = "special_category" then
-                    'displaySpecialCategoryScreen()
- '               else
-  '                  print "selected clip"
-   '                 print kid.AssetId
-    '                displayShowDetailScreenSingle(kid)                   
-'                    displayCategoryPosterScreen(kid)
-                'end if
+                showSendungVerpasst(m.SendungVerpasstList[msg.GetIndex()])
             else if msg.isScreenClosed() then
                 return -1
             end if
@@ -83,28 +48,57 @@ Function showCategoryScreen(screen As Object) As Integer
     return 0
 End Function
 
+'**********************************************************
+'**  The methods below are only intended to be used      **
+'**  within this screen file.                            **
+'**********************************************************
+
+'**********************************************************
+' Add more filter sections here.
+'**********************************************************
+Function initFilters(screen As Object)
+    m.filters = CreateObject("roArray", 2, true)
+    m.filters.push("Verpasste Sendungen")
+    m.filters.push("Impressum")
+    screen.SetListNames(m.filters)
+End Function
+
+'**********************************************************
+' Sets up the list for the Sendung Verpasst filter section.
+'**********************************************************
+Function initSenungVerpasstSection(screen As Object)
+    m.SendungVerpasstList = CreateObject("roArray", 10, true)
+    requestDate = CreateObject("roDateTime")
+    for i = 0 to 7
+        day = CreateObject("roAssociativeArray")
+        day.ShortDescriptionLine1 = requestDate.asDateString("long-date")
+        day.RequestDate = formatDateForSendungVerpasst(requestDate)
+        ' It uses Unshift instead of Push because the list should
+        ' be in reverse order for scrolling.
+        m.SendungVerpasstList.Unshift(day)
+        requestDate.FromSeconds(requestDate.AsSeconds() - 86400)
+    end for
+    screen.setContentList(m.SendungVerpasstList)
+End Function
+
+'**********************************************************
+' Resets the selection to the first filter and last item.
+' This work for the Sendung Verpasst list. It may need to
+' be changed if other sections get content as well.
+' It sets it to the last index because this puts the
+' selection on the current day and allows the user to
+' scroll backwards for previous days (instead of forward).
+'**********************************************************
+Function resetSelection(screen As Object)
+    screen.SetFocusedList(0)
+    screen.SetFocusedListItem(m.SendungVerpasstList.Count() - 1)
+    screen.SetFocusToFilterBanner(false)
+End Function
+
+'**********************************************************
+' Inits and shows the Sendung Verpasst screen.
+'**********************************************************
 Function showSendungVerpasst(day As Object) As Dynamic
     screen = preShowSendungVerpasstScreen()
     showSendungVerpasstScreen(screen, day)
 End Function
-
-
-Function formatDateForXMLRequest(date As Object) As Dynamic
-    day = date.getDayOfMonth()
-    month = date.getMonth()
-    year = date.getYear()
-    dateString = ""
-    if day < 10
-        dateString = dateString + "0" + day.toStr()
-    else
-        dateString = dateString + day.tostr()
-    endif
-    if month < 10
-        dateString = dateString + "0" + month.toStr()
-    else
-        dateString = dateString + month.tostr()
-    endif
-    dateString = dateString + (year - 2000).toStr()
-    return dateString
-End Function
-
