@@ -248,7 +248,6 @@ End Function
 Function ParseZDFDay(day As Object, dayTimePeriods As Integer, mapDayTimePeriodToRowIndex As Function) As Dynamic
     print "ZDF parsing"
     
-
     date = day.RequestDate
     print "Request for day: " + date
     dayUrl = "http://www.zdf.de/ZDFmediathek/xmlservice/web/sendungVerpasst?startdate=" + date + "&maxLength=50&enddate=" + date
@@ -268,81 +267,43 @@ Function ParseZDFDay(day As Object, dayTimePeriods As Integer, mapDayTimePeriodT
     endif
    ' Dbg("Parse Took: ", conn.Timer)
     
+    dayContentData = CreateObject("roArray", dayTimePeriods, true)
+    for i = 0 to dayTimePeriods - 1
+        dayContentData[i] = CreateObject("roArray", 10, true)
+    end for
 
-    'topNode = MakeEmptyCatNode()
-    'topNode.Title = "root"
-    'topNode.isapphome = true
-    topNode = CreateObject("roArray", 4, true)
-    topNode[0] = CreateObject("roArray", 10, true)
-    topNode[1] = CreateObject("roArray", 10, true)
-    topNode[2] = CreateObject("roArray", 10, true)
-    topNode[3] = CreateObject("roArray", 10, true)
-    
-    print xml.GetName()
-    level1 = xml.GetChildElements()
-    
-    print level1[1].getName()
-    teaserRoot = level1[1].GetChildElements()
-    teaserList = teaserRoot[1].GetChildElements()
-    
-    for each teaser in teaserList
+    r = CreateObject("roRegex", " ", "")
+
+    ' Go through each teaser (content) element in the list    
+    for each teaser in xml.teaserlist.teasers.teaser
         properties = teaser.GetChildElements()
         o = init_category_item()
         o.Type = "normal"
-        for each property in properties
-            print property.getName()
-            if property.getName() = "information"
-                items = property.GetChildElements()
-                for each item in items
-                    if item.getName() = "title"
-                        o.Title = item.getBody()
-                        o.ShortDescriptionLine1 = item.getBody()
-                        print item.getBody()
-                    endif
-                    if item.getName() = "detail"
-                      '  o.Description = item.getBody()
-                       ' o.ShortDescriptionLine2 = item.getBody()
-                    endif                    
-                next
-            endif
-            if property.getName() = "teaserimages"
-                items = property.GetChildElements()
-                for each item in items
-                    attrs = item.GetAttributes()
-                    for each attr in attrs
-                        if attr = "key" and item.GetAttributes()[attr] = "144x81"
-                            o.SDPosterURL = item.getBody()
-                        endif
-                        if attr = "key" and item.GetAttributes()[attr] = "236x133"
-                            o.HDPosterURL = item.getBody()
-                        endif
-                    next
-                next                
-            endif
-            if property.getName() = "details"
-                items = property.GetChildElements()
-                for each item in items
-                    if item.getName() = "assetId"
-                        o.AssetId = item.getBody()
-                        print item.getBody()
-                    endif
-                if item.getName() = "airtime"
-                    o.Description = item.getBody()
-                    o.ShortDescriptionLine2 = item.getBody()
-                endif
-                next
-            endif
-            
-        next
-        print "adding item"
-        index = mapDayTimePeriodToRowIndex(teaser.getAttributes()["member"])
+
+        info = teaser.information
+        details = teaser.details
+
+        airDateTime = details.airtime.getText()
+        airTime = r.Split(airDateTime)
+
+        o.Title = airTime[1] + " - " + details.originChannelTitle.getText() + " - " + info.title.getText()
+        o.Description = info.detail.getText()
+        o.AssetId = details.assetId.getText()
+        
+        for each teaserimage in teaser.teaserimages.teaserimage
+            if teaserimage@key = "144x81" then
+                o.SDPosterURL = teaserimage.getText()
+            else if teaserimage@key = "236x133" then
+                o.HDPosterURL = teaserimage.getText()
+            end if
+        end for
+
+        index = mapDayTimePeriodToRowIndex(teaser@member)
         if index <> -1 then
-            topNode[index].Push(o)  
+            dayContentData[index].Push(o)  
         end if
-    next
-    
-    print "ZDF parsing done"
-    return topNode
+    end for
+    return dayContentData
 End Function
 
 '***********************************************************

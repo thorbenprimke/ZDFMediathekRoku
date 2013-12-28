@@ -72,6 +72,7 @@ Function initSenungVerpasstSection(screen As Object)
     for i = 0 to 7
         day = CreateObject("roAssociativeArray")
         day.ShortDescriptionLine1 = requestDate.asDateString("long-date")
+        day.breadcrumbDate = requestDate.asDateString("short-month-no-weekday")
         day.RequestDate = formatDateForSendungVerpasst(requestDate)
         ' It uses Unshift instead of Push because the list should
         ' be in reverse order for scrolling.

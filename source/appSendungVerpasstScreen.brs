@@ -13,6 +13,7 @@ Function preShowSendungVerpasstScreen() As Object
     screen = CreateObject("roGridScreen")
     screen.SetMessagePort(port)
     screen.setGridStyle("flat-16x9")
+    screen.SetBreadcrumbEnabled(true)
     initListRows(screen)    
     return screen
 End Function
@@ -25,8 +26,11 @@ Function showSendungVerpasstScreen(screen As Object, day As Object) As Integer
     setupListData(screen, day)
     ' Always set the focus to the ' Mittags' section
     screen.SetFocusedListItem(1, 0)
+    ' Sets the breadcrumb information to indicate for which day the content is
+    screen.SetBreadcrumbText("Sendung Verpasst", day.breadcrumbDate)
     ' Show the screen and go into event mode
     screen.Show()
+    
     while true
         msg = wait(0, screen.GetMessagePort())
         if type(msg) = "roGridScreenEvent" then
