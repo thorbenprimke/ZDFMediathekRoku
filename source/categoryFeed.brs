@@ -245,7 +245,7 @@ Function GetZDFShowData(show As Object) As Dynamic
 
 End Function
 
-Function ParseZDFDay(day As Object) As Dynamic
+Function ParseZDFDay(day As Object, dayTimePeriods As Integer, mapDayTimePeriodToRowIndex As Function) As Dynamic
     print "ZDF parsing"
     
 
@@ -335,27 +335,15 @@ Function ParseZDFDay(day As Object) As Dynamic
             
         next
         print "adding item"
-'        teaser.getAttributes()["member"]
-        topNode[timeOfDayToIndex(teaser.getAttributes()["member"])].Push(o)  
- '       topNode.Push(o)
+        index = mapDayTimePeriodToRowIndex(teaser.getAttributes()["member"])
+        if index <> -1 then
+            topNode[index].Push(o)  
+        end if
     next
     
     print "ZDF parsing done"
     return topNode
 End Function
-    
-Function timeOfDayToIndex(time As String) As Integer
-    if time = "morgens" then
-        return 0
-    elseif time = "mittags" then
-        return 1
-    elseif time = "abends" then
-        return 2
-    else
-        return 3
-    end if
-End Function    
-
 
 '***********************************************************
 'Given the xml element to an <Category> tag in the category
