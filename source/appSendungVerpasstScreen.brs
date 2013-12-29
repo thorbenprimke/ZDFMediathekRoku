@@ -9,6 +9,9 @@
 ' the content by time of the day.
 '**********************************************************
 Function preShowSendungVerpasstScreen() As Object
+    if m.conn = invalid then
+        m.conn = InitZDFConnection()
+    end if
     port = CreateObject("roMessagePort")
     screen = CreateObject("roGridScreen")
     screen.SetMessagePort(port)
@@ -100,7 +103,7 @@ End Function
 ' content for each dayTimePeriod.
 '**********************************************************
 Function setupListData(screen As Object, day As Object) 
-    m.data = ParseZDFDay(day, getRowCount(), mapDayTimePeriodToRowIndex)
+    m.data = m.conn.LoadSendungVerpasstDataForDay(conn, day, getRowCount(), mapDayTimePeriodToRowIndex)
     ' Set up the data for each row
     for i = 0 to (m.rowDescs.Count() - 1)
        screen.SetContentList(i, m.data[i])
