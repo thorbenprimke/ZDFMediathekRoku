@@ -133,9 +133,10 @@ Function load_content_data_by_asset_id(conn As Object, show As Object) As Dynami
     lengthTexts = conn.WhiteSpaceSplitter.Split(lengthText)
     o.Length =  lengthTexts[0].toint() * 60
     
-    if details.hasCaption.getText() = "true"
-        o.SubtitleUrl = xml.video.caption.url.getText()
-    end if
+    ' Setting the SubtitleUrl seems to cause the Roku player to crash after 30s+ of playback
+    'if details.hasCaption.getText() = "true"
+    '    o.SubtitleUrl = xml.video.caption.url.getText()
+    'end if
     
     for each formitaet in xml.video.formitaeten.formitaet
         if formitaet@basetype = "h264_aac_mp4_http_na_na"
