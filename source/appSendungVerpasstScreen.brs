@@ -103,7 +103,7 @@ End Function
 ' content for each dayTimePeriod.
 '**********************************************************
 Function setupListData(screen As Object, day As Object) 
-    m.data = m.conn.LoadSendungVerpasstDataForDay(conn, day, getRowCount(), mapDayTimePeriodToRowIndex)
+    m.data = m.conn.LoadSendungVerpasstDataForDay(m.conn, day, getRowCount(), mapDayTimePeriodToRowIndex)
     ' Set up the data for each row
     for i = 0 to (m.rowDescs.Count() - 1)
        screen.SetContentList(i, m.data[i])
@@ -124,7 +124,7 @@ End Function
 Function displayShowDetailScreenShow(show as Object) As Integer
     if validateParam(show, "roAssociativeArray", "displayShowDetailScreenShow") = false return -1
 
-    show = GetZDFShowData(show)    
+    show = m.conn.LoadShowDataByAssetId(m.conn, show)
     screen = preShowDetailScreen(show.Title, show.Title)
     showIndex = showDetailScreen(screen, show, 1)
     return showIndex

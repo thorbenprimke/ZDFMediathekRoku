@@ -14,6 +14,7 @@ Function InitZDFConnection() As Object
     conn.UrlSendungVerpasst = conn.UrlPrefix + "sendungVerpasst?maxLength=50"
     conn.UrlSendungVerpasstStart = "&startdate="
     conn.UrlSendungVerpasstEnd = "&enddate="
+    conn.UrlBeitragDetails = conn.UrlPrefix + "beitragsDetails?ak=web&id="
 
     ' Add timer and regex objects    
     conn.Timer = CreateObject("roTimespan")
@@ -21,6 +22,7 @@ Function InitZDFConnection() As Object
     
     ' Set up the functions
     conn.LoadSendungVerpasstDataForDay = load_sendung_verpasst_data_for_day
+    conn.LoadContentDataByAssetId = load_content_data_by_asset_id
 
     return conn
 End Function
@@ -61,7 +63,7 @@ Function load_sendung_verpasst_data_for_day(conn As Object, day As Object, dayTi
     ' Go through each teaser (content) element in the list    
     for each teaser in xml.teaserlist.teasers.teaser
         properties = teaser.GetChildElements()
-        o = init_category_item()
+        o = CreateObject("roAssociativeArray")
         o.Type = "normal"
 
         info = teaser.information
@@ -74,13 +76,7 @@ Function load_sendung_verpasst_data_for_day(conn As Object, day As Object, dayTi
         o.Description = info.detail.getText()
         o.AssetId = details.assetId.getText()
         
-        for each teaserimage in teaser.teaserimages.teaserimage
-            if teaserimage@key = "144x81" then
-                o.SDPosterURL = teaserimage.getText()
-            else if teaserimage@key = "236x133" then
-                o.HDPosterURL = teaserimage.getText()
-            end if
-        end for
+        findAndSetPosterUrls(o, teaser.teaserimages.teaserimage)
 
         index = mapDayTimePeriodToRowIndex(teaser@member)
         if index <> -1 then
@@ -90,4 +86,77 @@ Function load_sendung_verpasst_data_for_day(conn As Object, day As Object, dayTi
     Dbg("Data Parse Took: ", conn.Timer)
     return dayContentData
 End Function
+
+'**********************************************************
+' Loads and parses the detailed data for a content item.
+' It uses the assetId to request a specific content.
+'**********************************************************
+Function load_content_data_by_asset_id(conn As Object, show As Object) As Dynamic
+
+    http = NewHttp(conn.UrlBeitragDetails + show.AssetId)
+    Dbg("url: ", http.Http.GetUrl())
+
+    conn.Timer.Mark()
+    rsp = http.GetToStringWithRetry()
+    Dbg("Took: ", conn.Timer)
+
+    conn.Timer.Mark()
+    xml=CreateObject("roXMLElement")
+    if not xml.Parse(rsp) then
+         print "Can't parse feed"
+        return invalid
+    endif
+    Dbg("Parse Took: ", conn.Timer)
+    
+
+    conn.Timer.Mark()
+    o = CreateObject("roAssociativeArray")
+    o.ContentType = "episode"
+    o.Rating = "NR"
+    o.StarRating = "75"
+    o.StreamBitrates = [0]
+    o.StreamQualities = ["HD"]
+    o.StreamFormat = "mp4"
+    o.minBandwidth = 20 
+    
+    info = xml.video.information
+    details = xml.video.details
+    
+    o.Title = info.title.getText()
+    o.ShortDescriptionLine1 = info.title.getText()
+    o.Description = info.detail.getText()
+    o.ShortDescriptionLine2 = info.detail.getText()
+    
+    o.AssetId = details.assetId.getText()
+    
+    findAndSetPosterUrls(o, xml.video.teaserimages.teaserimage)
+
+    for each formitaet in xml.video.formitaeten.formitaet
+        if formitaet@basetype = "h264_aac_mp4_http_na_na"
+            quality = formitaet.quality.getText()
+            ratio = formitaet.ratio.getText()
+            facet = formitaet.facets.facet[0].getText()
+            videoUrl = formitaet.url.getText()
+            if quality = "veryhigh" and ratio = "16:9" and facet = "progressive"
+                o.StreamUrls = [videoUrl]
+            endif
+        endif 
+    end for
+    Dbg("Data Parse Took: ", conn.Timer)
+    return o
+End Function
+
+'**********************************************************
+' Helper function for finding and setting the *PostUrls.
+'**********************************************************
+Function findAndSetPosterUrls(content As Object, teaserImages As Object) 
+    for each teaserimage in teaserImages
+        if teaserimage@key = "144x81" then
+            content.SDPosterURL = teaserimage.getText()
+        else if teaserimage@key = "236x133" then
+            content.HDPosterURL = teaserimage.getText()
+        end if
+    end for
+End Function
+
 
