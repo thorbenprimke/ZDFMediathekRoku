@@ -26,4 +26,6 @@ http://creativecommons.org/licenses/by-nc-nd/3.0/
 - ...
 
 ### Screenshots ###
-<img src="screenshots/categoryScreenWithSendungVerpasst.jpg" alt="Category Screen With Sendung Verpasst Section" style="width: 200px;"/>
+<img src="screenshots/SendungVerpasstOverview.jpg" alt="Sendung Verpasst Overview Screen" style="width: 200px;"/>
+<img src="screenshots/SendungVerpasstDay.jpg" alt="Sendung Verpasst Day Screen" style="width: 200px;"/>
+<img src="screenshots/SendungVerpasstDetail.jpg" alt="Sendung Verpasst Detail Screen" style="width: 200px;"/>
