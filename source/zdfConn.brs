@@ -131,12 +131,12 @@ Function load_content_data_by_asset_id(conn As Object, show As Object) As Dynami
   
     lengthText = details.length.getText()  
     lengthTexts = conn.WhiteSpaceSplitter.Split(lengthText)
-    o.Length =  lengthTexts[0] * 60
+    o.Length =  lengthTexts[0].toint() * 60
     
     if details.hasCaption.getText() = "true"
-        o.SubtitleUrl = xml.caption.url.getText()
+        o.SubtitleUrl = xml.video.caption.url.getText()
     end if
-
+    
     for each formitaet in xml.video.formitaeten.formitaet
         if formitaet@basetype = "h264_aac_mp4_http_na_na"
             quality = formitaet.quality.getText()
