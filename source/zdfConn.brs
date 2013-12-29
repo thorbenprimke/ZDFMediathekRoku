@@ -122,14 +122,20 @@ Function load_content_data_by_asset_id(conn As Object, show As Object) As Dynami
     info = xml.video.information
     details = xml.video.details
     
-    o.Title = info.title.getText()
-    o.ShortDescriptionLine1 = info.title.getText()
+    o.Title = details.originChannelTitle.getText() + " - " + info.title.getText()
     o.Description = info.detail.getText()
-    o.ShortDescriptionLine2 = info.detail.getText()
     
     o.AssetId = details.assetId.getText()
     
     findAndSetPosterUrls(o, xml.video.teaserimages.teaserimage)
+  
+    lengthText = details.length.getText()  
+    lengthTexts = conn.WhiteSpaceSplitter.Split(lengthText)
+    o.Length =  lengthTexts[0] * 60
+    
+    if details.hasCaption.getText() = "true"
+        o.SubtitleUrl = xml.caption.url.getText()
+    end if
 
     for each formitaet in xml.video.formitaeten.formitaet
         if formitaet@basetype = "h264_aac_mp4_http_na_na"
