@@ -10,14 +10,14 @@ Sub Main()
     initTheme()
 
     'prepare the screen for display and get ready to begin
-    screen=preShowCategoryScreen()
+    screen=preShowSendungVerpasstOverviewScreen()
     if screen=invalid then
         print "unexpected error in preShowHomeScreen"
         return
     end if
 
     'set to go, time to get started
-    showCategoryScreen(screen)
+    showSendungVerpasstOverviewScreen(screen)
 
 End Sub
 

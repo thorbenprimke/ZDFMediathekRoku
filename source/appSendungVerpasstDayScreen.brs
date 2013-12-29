@@ -1,14 +1,14 @@
 '**********************************************************
-'**  ZDF Mediathek - Sendung Verpasst screen. It lists all
-'**  content for a single day split up by time periods.
+'**  ZDF Mediathek - Sendung Verpasst day screen. It lists
+'**  all content for a single day split up by time periods.
 '**********************************************************
 
 '**********************************************************
-' Sets up the Sendung Verpasst screen. This  screen lists
-' all the content for a day. It uses  a grid to split up
-' the content by time of the day.
+' Sets up the Sendung Verpasst day screen. This  screen 
+' lists all the content for a day. It uses  a grid to split
+' up the content by time of the day.
 '**********************************************************
-Function preShowSendungVerpasstScreen() As Object
+Function preShowSendungVerpasstDayScreen() As Object
     if m.conn = invalid then
         m.conn = InitZDFConnection()
     end if
@@ -22,10 +22,10 @@ Function preShowSendungVerpasstScreen() As Object
 End Function
 
 '**********************************************************
-' Shows the 'Sending Verpasst' screen. Fetches the content
+' Shows the 'Sending Verpasst' day screen. Fetches the content
 ' for the day and sets up the rows.
 '**********************************************************
-Function showSendungVerpasstScreen(screen As Object, day As Object) As Integer
+Function showSendungVerpasstDayScreen(screen As Object, day As Object) As Integer
     setupListData(screen, day)
     ' Always set the focus to the ' Mittags' section
     screen.SetFocusedListItem(1, 0)
