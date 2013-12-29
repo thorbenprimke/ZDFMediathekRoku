@@ -44,20 +44,20 @@ Sub initTheme()
     theme.OverhangOffsetHD_Y = "35"
     theme.OverhangSliceHD = "pkg:/images/Overhang_Background_HD.png"
     theme.OverhangLogoHD  = "pkg:/images/Overhang_Logo_HD.png"
-
-    theme.OverhangSliceHD = "pkg:/images/Overhang_Background_HD.png"
-    theme.OverhangLogoHD  = "pkg:/images/Overhang_Logo_HD.png"
+    
+    theme.BackgroundColor = "#9f9f9f"
 
     theme.GridScreenLogoHD = "pkg:/images/Overhang_Logo_HD.png"
     theme.GridScreenLogoSD = "pkg:/images/Overhang_Logo_SD.png"
-    theme.GridScreenOverhangHeightHD = "138"
-    theme.GridScreenOverhangHeightSD = "138"
+    theme.GridScreenOverhangHeightHD = "129"
+    theme.GridScreenOverhangHeightSD = "129"
     theme.GridScreenOverhangSliceHD = "pkg:/images/Overhang_Background_HD.png"
     theme.GridScreenOverhangSliceSD = "pkg:/images/Overhang_Background_SD.png"
     theme.GridScreenLogoOffsetHD_X = "125"
     theme.GridScreenLogoOffsetHD_Y = "35"
     theme.GridScreenLogoOffsetSD_X = "72"
     theme.GridScreenLogoOffsetSD_Y = "31"
+    theme.GridScreenBackgroundColor = "#9f9f9f"
 
     app.SetTheme(theme)
 
