@@ -1,10 +1,15 @@
 '**********************************************************
-'**  Video Player Example Application - Detail Screen 
-'**  November 2009
-'**  Copyright (c) 2009 Roku Inc. All Rights Reserved.
+'**  ZDF Mediathek - Content detail screen. It lists the
+'**  details for a content object.
+'**  Adopted from the video player example - detail screen
 '**********************************************************
 
-Function preShowDetailScreen(breadA=invalid, breadB=invalid) As Object
+'**********************************************************
+' Sets up the detail screen. The detail screen is a
+' roSpringboardScreen with style video and without the
+' star rating indicator.
+'**********************************************************
+Function preShowDetailScreen() As Object
     port = CreateObject("roMessagePort")
     screen = CreateObject("roSpringboardScreen")
     screen.SetDescriptionStyle("video") 
@@ -13,23 +18,18 @@ Function preShowDetailScreen(breadA=invalid, breadB=invalid) As Object
     return screen
 End Function
 
-'***************************************************************
-'** The show detail screen (springboard) is where the user sees
-'** the details for a show and is allowed to select a show to
-'** begin playback.  This is the main event loop for that screen
-'** and where we spend our time waiting until the user presses a
-'** button and then we decide how best to handle the event.
-'***************************************************************
-Function showDetailScreen(screen As Object, showList As Object, showIndex As Integer) As Integer
+
+'**********************************************************
+' Shows the detail screen about a content. This runs the
+' main event loop and either starts a video from the
+' beginning or resumes at a previous position. 
+'**********************************************************
+Function showDetailScreen(screen As Object, show As Object) As Integer
     if validateParam(screen, "roSpringboardScreen", "showDetailScreen") = false return -1
-    'if validateParam(showList, "roArray", "showDetailScreen") = false return -1
+    if validateParam(show, "roAssociativeArray", "showDetailScreen") = false return -1
 
-    refreshShowDetail(screen, showList, showIndex)
+    updateShowDetail(screen, show)
 
-    'remote key id's for left/right navigation
-    remoteKeyLeft  = 4
-    remoteKeyRight = 5
- 
     while true
         msg = wait(0, screen.GetMessagePort())
 
@@ -37,36 +37,21 @@ Function showDetailScreen(screen As Object, showList As Object, showIndex As Int
             if msg.isScreenClosed()
                 print "Screen closed"
                 exit while
-            else if msg.isRemoteKeyPressed() 
-                print "Remote key pressed"
-                if msg.GetIndex() = remoteKeyLeft then
-                        showIndex = getPrevShow(showList, showIndex)
-                        if showIndex <> -1
-                            refreshShowDetail(screen, showList, showIndex)
-                        end if
-                else if msg.GetIndex() = remoteKeyRight
-                    showIndex = getNextShow(showList, showIndex)
-                        if showIndex <> -1
-                           refreshShowDetail(screen, showList, showIndex)
-                        end if
-                endif
             else if msg.isButtonPressed() 
-                print "ButtonPressed"
-                print "ButtonPressed"
+                print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
                 if msg.GetIndex() = 1
                     PlayStart = RegRead(showList.AssetId)
                     if PlayStart <> invalid then
-                        showList.PlayStart = PlayStart.ToInt()
+                        show.PlayStart = PlayStart.ToInt()
                     endif
-                    showVideoScreen(showList)
-                    refreshShowDetail(screen,showList,showIndex)
+                    showVideoScreen(show)
+                    updateShowDetail(screen, show)
                 endif
                 if msg.GetIndex() = 2
                     showList.PlayStart = 0
                     showVideoScreen(showList)
-                    refreshShowDetail(screen,showList,showIndex)
+                    updateShowDetail(screen, show)
                 endif
-                print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
             end if
         else
             print "Unexpected message class: "; type(msg)
@@ -77,28 +62,18 @@ Function showDetailScreen(screen As Object, showList As Object, showIndex As Int
 
 End Function
 
-'**************************************************************
-'** Refresh the contents of the show detail screen. This may be
-'** required on initial entry to the screen or as the user moves
-'** left/right on the springboard.  When the user is on the
-'** springboard, we generally let them press left/right arrow keys
-'** to navigate to the previous/next show in a circular manner.
-'** When leaving the screen, the should be positioned on the 
-'** corresponding item in the poster screen matching the current show
-'**************************************************************
-Function refreshShowDetail(screen As Object, showList As Object, showIndex as Integer) As Integer
-
+'**********************************************************
+' Updates the contents of the detail screen with the
+' passed roAssociativeArray with the content information.
+'**********************************************************
+Function updateShowDetail(screen As Object, show As Object) As Integer
     if validateParam(screen, "roSpringboardScreen", "refreshShowDetail") = false return -1
-    'if validateParam(showList, "roArray", "refreshShowDetail") = false return -1
+    if validateParam(showList, "roAssociativeArray", "refreshShowDetail") = false return -1
 
-    show = showList
-    screen.ClearButtons()
- 
-    'Uncomment this statement to dump the details for each show
-    'PrintAA(show)
-
+    screen.ClearButtons() 
     if show.StreamUrls <> invalid and show.StreamUrls.Count() = 0
         ' Adds a message to let the user know that the asset does not have video content
+        ' This could also be a dialog window
         show.Description = "ASSET DOES NOT HAVE VIDEO CONTENT - " + show.Description
     else
         progress = regread(show.AssetId)
@@ -109,51 +84,7 @@ Function refreshShowDetail(screen As Object, showList As Object, showIndex as In
             screen.addbutton(1, "Play")
         end if
     end if
-    
     screen.SetContent(show)
     screen.Show()
-
 End Function
 
-'********************************************************
-'** Get the next item in the list and handle the wrap 
-'** around case to implement a circular list for left/right 
-'** navigation on the springboard screen
-'********************************************************
-Function getNextShow(showList As Object, showIndex As Integer) As Integer
-    if validateParam(showList, "roArray", "getNextShow") = false return -1
-
-    nextIndex = showIndex + 1
-    if nextIndex >= showList.Count() or nextIndex < 0 then
-       nextIndex = 0 
-    end if
-
-    show = showList[nextIndex]
-    if validateParam(show, "roAssociativeArray", "getNextShow") = false return -1 
-
-    return nextIndex
-End Function
-
-
-'********************************************************
-'** Get the previous item in the list and handle the wrap 
-'** around case to implement a circular list for left/right 
-'** navigation on the springboard screen
-'********************************************************
-Function getPrevShow(showList As Object, showIndex As Integer) As Integer
-    if validateParam(showList, "roArray", "getPrevShow") = false return -1 
-
-    prevIndex = showIndex - 1
-    if prevIndex < 0 or prevIndex >= showList.Count() then
-        if showList.Count() > 0 then
-            prevIndex = showList.Count() - 1 
-        else
-            return -1
-        end if
-    end if
-
-    show = showList[prevIndex]
-    if validateParam(show, "roAssociativeArray", "getPrevShow") = false return -1 
-
-    return prevIndex
-End Function

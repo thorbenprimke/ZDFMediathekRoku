@@ -125,7 +125,7 @@ Function displayShowDetailScreenShow(show as Object) As Integer
     if validateParam(show, "roAssociativeArray", "displayShowDetailScreenShow") = false return -1
 
     show = m.conn.LoadContentDataByAssetId(m.conn, show)
-    screen = preShowDetailScreen(show.Title, show.Title)
-    showIndex = showDetailScreen(screen, show, 1)
+    screen = preShowDetailScreen()
+    showIndex = showDetailScreen(screen, show)
     return showIndex
 End Function
