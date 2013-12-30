@@ -58,20 +58,18 @@ Function showDetailScreen(screen As Object, showList As Object, showIndex As Int
                 print "ButtonPressed"
                 print "ButtonPressed"
                 if msg.GetIndex() = 1
-'                    PlayStart = RegRead(showList[showIndex].ContentId)
-'                    if PlayStart <> invalid then
-'                        showList[showIndex].PlayStart = PlayStart.ToInt()
-'                    endif
+                    PlayStart = RegRead(showList.AssetId)
+                    if PlayStart <> invalid then
+                        showList.PlayStart = PlayStart.ToInt()
+                    endif
                     showVideoScreen(showList)
                     refreshShowDetail(screen,showList,showIndex)
                 endif
- '               if msg.GetIndex() = 2
- '                   showList[showIndex].PlayStart = 0
- '                   showVideoScreen(showList[showIndex])
- '                   refreshShowDetail(screen,showList,showIndex)
- '               endif
-  '              if msg.GetIndex() = 3
-  '              endif
+                if msg.GetIndex() = 2
+                    showList.PlayStart = 0
+                    showVideoScreen(showList)
+                    refreshShowDetail(screen,showList,showIndex)
+                endif
                 print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
             end if
         else
@@ -103,12 +101,12 @@ Function refreshShowDetail(screen As Object, showList As Object, showIndex as In
     'PrintAA(show)
 
     screen.ClearButtons()
-'    if regread(show.contentid) <> invalid and regread(show.contentid).toint() >=30 then
- '   screen.AddButton(1, "Resume playing")    
-  '  screen.AddButton(2, "Play from beginning")    
-   ' else
-    screen.addbutton(1,"Play")
- '   end if
+    if regread(show.AssetId) <> invalid and regread(show.AssetId).toint() >=10 then
+        screen.AddButton(1, "Resume playing")    
+        screen.AddButton(2, "Play from beginning")    
+    else        
+        screen.addbutton(1, "Play")
+    end if
     screen.SetContent(show)
     screen.Show()
 

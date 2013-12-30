@@ -26,7 +26,7 @@ Function showVideoScreen(episode As Object)
 
     print episode.StreamUrls
 
-    screen.SetPositionNotificationPeriod(30)
+    screen.SetPositionNotificationPeriod(10)
     screen.SetContent(episode)
     screen.Show()
 
@@ -49,7 +49,7 @@ Function showVideoScreen(episode As Object)
                 print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
             elseif msg.isPlaybackPosition() then
                 nowpos = msg.GetIndex()
-                'RegWrite(episode.ContentId, nowpos.toStr())
+                RegWrite(episode.AssetId, nowpos.toStr())
             else
                 print "Unexpected event type: "; msg.GetType()
             end if
