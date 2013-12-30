@@ -19,6 +19,7 @@ Function InitZDFConnection() As Object
     ' Add timer and regex objects    
     conn.Timer = CreateObject("roTimespan")
     conn.WhiteSpaceSplitter = CreateObject("roRegex", " ", "")
+    conn.UnderscoreSplitter = CreateObject("roRegex", "_", "")
     
     ' Set up the functions
     conn.LoadSendungVerpasstDataForDay = load_sendung_verpasst_data_for_day
@@ -112,12 +113,7 @@ Function load_content_data_by_asset_id(conn As Object, show As Object) As Dynami
     conn.Timer.Mark()
     o = CreateObject("roAssociativeArray")
     o.ContentType = "episode"
-    o.Rating = "NR"
-    o.StarRating = "75"
-    o.StreamBitrates = [0]
-    o.StreamQualities = ["HD"]
     o.StreamFormat = "mp4"
-    o.minBandwidth = 20 
     
     info = xml.video.information
     details = xml.video.details
@@ -138,17 +134,26 @@ Function load_content_data_by_asset_id(conn As Object, show As Object) As Dynami
     '    o.SubtitleUrl = xml.video.caption.url.getText()
     'end if
     
+    streamQualities = CreateObject("roArray", 3, true)
+    streamUrls = CreateObject("roArray", 3, true)
+    streamBitrates = CreateObject("roArray", 3, true)
+
     for each formitaet in xml.video.formitaeten.formitaet
-        if formitaet@basetype = "h264_aac_mp4_http_na_na"
-            quality = formitaet.quality.getText()
-            ratio = formitaet.ratio.getText()
+        if formitaet@basetype = "h264_aac_mp4_http_na_na" then
             facet = formitaet.facets.facet[0].getText()
-            videoUrl = formitaet.url.getText()
-            if quality = "veryhigh" and ratio = "16:9" and facet = "progressive"
-                o.StreamUrls = [videoUrl]
-            endif
+            ratio = formitaet.ratio.getText()
+            quality = formitaet.quality.getText()
+            if facet = "progressive" and ratio = "16:9" then
+                url = formitaet.url.getText()
+                streamQualities.Push("HD")
+                streamUrls.Push(url)
+                streamBitrates.Push(getBitrateFromUrl(conn, url))
+            end if
         endif 
     end for
+    o.StreamUrls = streamUrls
+    o.StreamBitrates = streamBitrates
+    o.StreamQualities = streamQualities
     Dbg("Data Parse Took: ", conn.Timer)
     return o
 End Function
@@ -166,4 +171,18 @@ Function findAndSetPosterUrls(content As Object, teaserImages As Object)
     end for
 End Function
 
-
+'**********************************************************
+' Helper function to get the bitrate value from the url
+' string. The xml includes a bitrate value but it isn't
+' the correct one (Roku doesn't accept them and thus the
+' quality stars aren't shown on the playback screen. The
+' bitrate in the url is accepted.
+'**********************************************************
+Function getBitrateFromUrl(conn As Object, url As String) As String
+    ' Split the url by the underscore
+    urlParts = conn.UnderscoreSplitter.Split(url)
+    ' The bitrate is the second part from the back
+    bitrate = urlParts[urlParts.Count() - 2] 
+    ' Needs to remove the 'k' from the bitrate value
+    return left(bitrate, len(bitrate) - 1) 
+End Function
