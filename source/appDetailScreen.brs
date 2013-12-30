@@ -5,14 +5,11 @@
 '**********************************************************
 
 Function preShowDetailScreen(breadA=invalid, breadB=invalid) As Object
-    port=CreateObject("roMessagePort")
+    port = CreateObject("roMessagePort")
     screen = CreateObject("roSpringboardScreen")
     screen.SetDescriptionStyle("video") 
+    screen.SetStaticRatingEnabled(false)
     screen.SetMessagePort(port)
-'    if breadA<>invalid and breadB<>invalid then
- '       screen.SetBreadcrumbText(breadA, breadB)
-  '  end if
-
     return screen
 End Function
 
@@ -24,7 +21,6 @@ End Function
 '** button and then we decide how best to handle the event.
 '***************************************************************
 Function showDetailScreen(screen As Object, showList As Object, showIndex As Integer) As Integer
-
     if validateParam(screen, "roSpringboardScreen", "showDetailScreen") = false return -1
     'if validateParam(showList, "roArray", "showDetailScreen") = false return -1
 
@@ -96,17 +92,24 @@ Function refreshShowDetail(screen As Object, showList As Object, showIndex as In
     'if validateParam(showList, "roArray", "refreshShowDetail") = false return -1
 
     show = showList
-
+    screen.ClearButtons()
+ 
     'Uncomment this statement to dump the details for each show
     'PrintAA(show)
 
-    screen.ClearButtons()
-    if regread(show.AssetId) <> invalid and regread(show.AssetId).toint() >=10 then
-        screen.AddButton(1, "Resume playing")    
-        screen.AddButton(2, "Play from beginning")    
-    else        
-        screen.addbutton(1, "Play")
+    if show.StreamUrls <> invalid and show.StreamUrls.Count() = 0
+        ' Adds a message to let the user know that the asset does not have video content
+        show.Description = "ASSET DOES NOT HAVE VIDEO CONTENT - " + show.Description
+    else
+        progress = regread(show.AssetId)
+        if progress <> invalid and progress.toint() >=10 then
+            screen.AddButton(1, "Resume playing")    
+            screen.AddButton(2, "Play from beginning")
+        else
+            screen.addbutton(1, "Play")
+        end if
     end if
+    
     screen.SetContent(show)
     screen.Show()
 
