@@ -40,7 +40,7 @@ Function showDetailScreen(screen As Object, show As Object) As Integer
             else if msg.isButtonPressed() 
                 print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
                 if msg.GetIndex() = 1
-                    PlayStart = RegRead(showList.AssetId)
+                    PlayStart = RegRead(show.AssetId)
                     if PlayStart <> invalid then
                         show.PlayStart = PlayStart.ToInt()
                     endif
@@ -48,8 +48,8 @@ Function showDetailScreen(screen As Object, show As Object) As Integer
                     updateShowDetail(screen, show)
                 endif
                 if msg.GetIndex() = 2
-                    showList.PlayStart = 0
-                    showVideoScreen(showList)
+                    show.PlayStart = 0
+                    showVideoScreen(show)
                     updateShowDetail(screen, show)
                 endif
             end if
@@ -68,7 +68,7 @@ End Function
 '**********************************************************
 Function updateShowDetail(screen As Object, show As Object) As Integer
     if validateParam(screen, "roSpringboardScreen", "refreshShowDetail") = false return -1
-    if validateParam(showList, "roAssociativeArray", "refreshShowDetail") = false return -1
+    if validateParam(show, "roAssociativeArray", "refreshShowDetail") = false return -1
 
     screen.ClearButtons() 
     if show.StreamUrls <> invalid and show.StreamUrls.Count() = 0
