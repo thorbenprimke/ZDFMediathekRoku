@@ -57,9 +57,6 @@ Function showDetailScreen(screen As Object, show As Object) As Integer
             print "Unexpected message class: "; type(msg)
         end if
     end while
-
-    return showIndex
-
 End Function
 
 '**********************************************************
