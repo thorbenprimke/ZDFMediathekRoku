@@ -20,6 +20,6 @@
 APPNAME = ZDFMediathekRoku
 VERSION = 1.0
 
-ZIP_EXCLUDE= -x screenshots/* -x artwork/* -x \*.pkg -x storeassets\* -x keys\* -x \*/.\*
+ZIP_EXCLUDE= -x screenshots\* -x .git\* -x published\* -x artwork\* -x out\* -x dist\* -x \*.pkg -x .DS_Store -x .project -x .settings\* -x \*.md -x storeassets\* -x keys\* -x \*/.\*
 
 include ../RokuSDK/examples/source/app.mk
