@@ -50,6 +50,8 @@ Function showVideoScreen(episode As Object)
             elseif msg.isPlaybackPosition() then
                 nowpos = msg.GetIndex()
                 RegWrite(episode.AssetId, nowpos.toStr())
+            else if msg.isFullResult() then
+                RegWrite(episode.AssetId, "0")
             else
                 print "Unexpected event type: "; msg.GetType()
             end if
