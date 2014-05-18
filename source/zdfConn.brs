@@ -145,7 +145,10 @@ Function load_content_data_by_asset_id(conn As Object, show As Object) As Dynami
             quality = formitaet.quality.getText()
             if facet = "progressive" and ratio = "16:9" then
                 url = formitaet.url.getText()
-                streamQualities.Push("HD")
+                ' Hack to get video working on HD and SD because the SD stream seems to be
+                ' protected / needs some special authentication. Setting the quality to
+                ' false makes the video play on both SD and HD devices.
+                streamQualities.Push(false)
                 streamUrls.Push(url)
                 streamBitrates.Push(getBitrateFromUrl(conn, url))
             end if
