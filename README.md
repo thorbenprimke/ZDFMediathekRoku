@@ -1,5 +1,6 @@
-# Roku channel for ZDF Mediathek #
+# Roku channel for ZDF Mediathek (Deprecated) #
 
+### Note: I'm no longer actively working on this. The app still works [for me] but I won't be adding any new feature.
 
 Why?
 ----
